@@ -10,8 +10,8 @@ const jsFinList = document.querySelector(".js-finishList");
 let penList = [];
 let finList = [];
 // for saving localstorage
-penKey = "PENDING";
-finKey = "FINISHED";
+const penKey = "PENDING";
+const finKey = "FINISHED";
 
 function handleSubmit(event){
   event.preventDefault();
