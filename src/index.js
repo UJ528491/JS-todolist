@@ -9,118 +9,109 @@ const jsFinList = document.querySelector(".js-finishList");
 // for display list
 let penList = [];
 let finList = [];
-// for save to localstorage
+// for saving localstorage
 penKey = "PENDING";
 finKey = "FINISHED";
 
 function handleSubmit(event){
   event.preventDefault();
-  const currentValue = input.value;
-  penPrint(currentValue);
+  const inputString = input.value;
+  penPrint(inputString);
+  input.value = "";
+}
+function penPrint(obj){
+  console.log(penList);
+  const delBtn = document.createElement("button");
+  delBtn.innerText = "❌"
+  const Li = document.createElement("li");
+  // display and save input data
+  if(typeof(obj)==="string"){
+    // creat id for 'int' -> 'string'
+    const id = JSON.stringify(penList.length + finList.length + 1);
+    const toFinBtn = document.createElement("button");
+    toFinBtn.innerText = "✅"
+    Li.id = id;
+    Li.innerText = obj;
+    Li.append(delBtn);
+    Li.append(toFinBtn);
+    jsPenList.append(Li);
+    const penObj = {
+      id,
+      text : obj
+    };
+    penList.push(penObj);
+    save(penKey, penList);
+    delBtn.addEventListener("click",DeletePen);
+    toFinBtn.addEventListener("click", MoveToFin);
+  }else { // display localstorage pending data
+    const id = obj.id;
+    const toFinBtn = document.createElement("button");
+    toFinBtn.innerText = "✅"
+    Li.id = id;
+    Li.innerText = obj.text;
+    Li.append(delBtn);
+    Li.append(toFinBtn);
+    jsPenList.append(Li);
+    delBtn.addEventListener("click",DeletePen);
+    toFinBtn.addEventListener("click", MoveToFin);
+  }
+}
+function finPrint(obj){
+  const delBtn = document.createElement("button");
+  delBtn.innerText = "❌"
+  const toPenBtn = document.createElement("button");
+  toPenBtn.innerText = "⏪"
+  const id = obj.id;
+  const Li = document.createElement("li");
+  Li.id = id;
+  Li.innerText = obj.text;
+  Li.append(delBtn);
+  Li.append(toPenBtn);
+  jsFinList.append(Li);
+  delBtn.addEventListener("click",DeleteFin);
+  toPenBtn.addEventListener("click", MoveToPen);
 }
 
-function penPrint(text){
-  const penLi = document.createElement("li");
-  const delBtn = document.createElement("button");
-  const toFinBtn = document.createElement("button");
-  // initial id = 1
-  const id = penList.length + 1;
-  delBtn.innerText = "❌"
-  toFinBtn.innerText = "✅"
-  penLi.innerText = text;
-  penLi.id = id;
-  penLi.append(delBtn);
-  penLi.append(toFinBtn);
-  jsPenList.append(penLi);
-  const penObj = {
-    id,
-    text
-  };
-  penList.push(penObj);
-  save(penKey, penList);
-  delBtn.addEventListener("click",penDelItem);
-  toFinBtn.addEventListener("click", toFinItem);
-}
-function finPrint(text){
-  const finLi = document.createElement("li");
-  const delBtn = document.createElement("button");
-  const toPenBtn = document.createElement("button");
-  // initial id = 1
-  const id = finList.length + 1;
-  delBtn.innerText = "❌"
-  toPenBtn.innerText = "⏪"
-  finLi.innerText = text;
-  finLi.id = id;
-  finLi.append(delBtn);
-  finLi.append(toPenBtn);
-  jsFinList.append(finLi);
-  const finObj = {
-    id,
-    text
-  };
-  finList.push(finObj);
-}
-function toFinItem(event){
-  penDelItem(event);
+function MoveToFin(event){
+  DeletePen(event);
   const text = event.target.parentNode.firstChild.textContent;
+  // crearting id for 'string'
   const id = event.target.parentNode.id;
-  const finLi = document.createElement("li");
-  const delBtn = document.createElement("button");
-  const toFinBtn = document.createElement("button");
-  const finObj = {
+  const obj = {
     id, text
   };
-  finList.push(finObj);
+  finList.push(obj);
   save(finKey, finList);
-  delBtn.innerText = "❌"
-  toFinBtn.innerText = "⏪"
-  finLi.innerText = text;
-  finLi.id = id;
-  finLi.append(delBtn);
-  finLi.append(toPenBtn);
-  jsFinList.append(finLi);
-  toFinBtn.addEventListener("click", toPenItem);
-  delBtn.addEventListener("click", finDelItem);
+  finPrint(obj);
 }
-function toPenItem(event){
-  finDelItem(event)
+function MoveToPen(event){
+  DeleteFin(event) //working
   const text = event.target.parentNode.firstChild.textContent;
+  // crearting id for 'string'
   const id = event.target.parentNode.id;
-  const penLi = document.createElement("li");
-  const delBtn = document.createElement("button");
-  const toPenBtn = document.createElement("button");
-  const penObj = {
+  const obj = {
     id, text
   };
-  penList.push(penObj);
+  penList.push(obj);
   save(penKey, penList);
-  delBtn.innerText = "❌"
-  toPenBtn.innerText = "⏪"
-  penLi.innerText = text;
-  penLi.id = id;
-  penLi.append(delBtn);
-  penLi.append(toPenBtn);
-  jsPenList.append(penLi);
+  penPrint(obj);
 }
-function penDelItem(event){
+
+function DeletePen(event){ 
   const li = event.target.parentElement;
   jsPenList.removeChild(li);
   // true is keep, false is discard : for discard btn li
-  const modifiedLi = penList.filter((value => value.id !== parseInt(li.id)));
+  // crearting id for 'string'
+  const modifiedLi = penList.filter((value => value.id !== li.id));
   penList = modifiedLi;
   save(penKey, penList);
 }
-function finDelItem(event){
-  penDelItem(event);
+function DeleteFin(event){
   const li = event.target.parentElement;
   jsFinList.removeChild(li);
   // true is keep, false is discard : for discard btn li
-  const modifiedLi = finList.filter(function(value){
-    console.log(value.id);
-    console.log(li.id);
-    return value.id !== parseInt(li.id);
-  });
-  // const modifiedLi = finList.filter((value => value.id !== parseInt(li.id)));
+  const modifiedLi = finList.filter((value => value.id !== li.id));
+  console.log("새 오브젝트 완성");
   console.log(modifiedLi);
   finList = modifiedLi;
   save(finKey, finList);
@@ -133,17 +124,21 @@ function load(key){
   const loadedObj = localStorage.getItem(key);
   if(loadedObj !== null){
     const LSValue = JSON.parse(loadedObj);
-    LSValue.forEach(value => {
+    LSValue.forEach(obj => {
         if(key===penKey){
-          penPrint(value.text);
+          penList.push(obj); // prevent to creat new obj when you load
+          penPrint(obj);
         }else{
-          finPrint(value.text);
+          finList.push(obj);
+          finPrint(obj);
         }
-      });
-    }
+    });
+  }
 }
 
-load(penKey);
-load(finKey);
-form.addEventListener("submit", handleSubmit);
-
+function init(){
+  load(penKey);
+  load(finKey);
+  form.addEventListener("submit", handleSubmit);
+}
+init();
